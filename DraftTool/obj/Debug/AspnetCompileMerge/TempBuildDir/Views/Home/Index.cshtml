@@ -1,0 +1,246 @@
+﻿@using DraftTool.Models;
+@{
+    ViewBag.Title = "Cheat Sheet Manager";
+}
+@model DraftTool.Models.DraftBoardViewModel
+<div class="row  top-control">
+    <div class="playerSelectBox">
+        <h1>Fantasy CSM</h1>
+        <label for="basic-url">Player Name:</label>
+        <div class="input-group">
+            <select class="electize-control" name="playerSelect" id="playerSelect">
+                <option value=""> Select a player </option>
+                @foreach (Player player in Model.Players)
+            {
+                    <option data-fullname="@player.Name" data-position="@player.Position" data-byeweek="@player.ByeWeek" data-team="@player.TeamName">@player.Name</option>
+                }
+            </select>
+            <span class="input-group-btn">
+                <button id="draftButton" class="btn btn-default" type="button">Draft</button>
+                <button id="undoButton" class="btn btn-default" type="button">Undo</button>
+                <button id="blackOutButton" class="btn btn-default" type="button">Black Out</button>
+            </span>
+        </div>
+    </div>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs draft-tabs">
+        <li class="active"><a class="nav-link active" data-toggle="tab" href="#panel1" role="tab">Draft Board</a></li>
+        <li id="add-cheatsheet"><a class="nav-link" data-toggle="modal" data-target="#createCheatSheetModal" role="tab">+ Add Cheat Sheet</a></li>
+    </ul>
+</div>
+
+
+<div class="row">
+    <!-- Tab panels -->
+    <div class="tab-content card">
+        <!--Panel 1-->
+        <div class="tab-pane fade in active" id="panel1" role="tabpanel">
+            <table class="table draftTable">
+                <thead>
+                    <tr>
+                        <th class="roundNumber">#</th>
+                        @for (int t = 1; t <= Model.Teams; t++)
+                        {
+                            <th>Team @t</th>
+                        }
+                <tbody>
+                    @{bool even = false; int rowId = 1;}
+                    @for (int r = 1; r <= Model.RosterSize; r++)
+                    {
+                        if (even)
+                        {
+                            rowId += Model.Teams - 1;
+                        }
+                        <tr>
+                            <th scope="row">@r</th>
+                            @for (int t = 1; t <= Model.Teams; t++)
+                            {
+
+                                <td id="@(rowId)">
+                                    <div class="stickerPick row">
+
+                                    </div>
+                                </td>
+                                if (even) { rowId = --rowId; }
+                                if (!even) { rowId = ++rowId; }
+                            }
+                            @if (even)
+                            {
+                                rowId += Model.Teams + 1;
+                            }
+                        </tr>
+                        { even = !even; }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!--/.Panel 1-->
+    </div>
+</div>
+
+
+
+<!-- Modal -->
+<div id="createCheatSheetModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Import Cheat Sheet</h4>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="cheatsheet_title">Cheat Sheet Name</label>
+                        <input type="email" class="form-control" id="cheatsheet_title" placeholder="Cheat Sheet">
+                    </div>
+                    <div class="form-group">
+                        <label for="cheatsheet_data">Copy and paste cheat sheet here</label>
+                        <textarea id="cheatsheet_data" class="form-control"></textarea>
+                    </div>     
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="createCheatSheet" data-dismiss="modal" class="btn btn-default">Creat Cheat Sheet</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@section scripts {
+    <script type="text/javascript">
+        var currentSpot = 1;
+        var selectedPlayer;
+        var selectizePlayer;
+        $(document).ready(function () {
+            selectizePlayer = $('#playerSelect').selectize({
+                create: true,
+                plugins: ['preserve_on_blur'],
+                onInitialize: function () {
+                    var s = this;
+                    this.revertSettings.$children.each(function () {
+                        $.extend(s.options[this.value], $(this).data());
+                    });
+                },
+                onChange: function (value) {
+                    selectedPlayer = this.options[value];
+                }
+            });
+
+            $('#draftButton').click(function () {
+                if (selectedPlayer) {
+                    var playerNameToRemove;
+                    $("#" + currentSpot).html("<div class='stickerPick position-" + selectedPlayer.position + "'>" +
+                                            "<div class='stickerPosition'>" + selectedPlayer.position + "</div>" +
+                                            "<div class='stickerTeamAndWeek'>" + selectedPlayer.team + " / " + selectedPlayer.byeweek + " </div>" +
+                                            "<div class='stickerNamePlate'>" +
+                                                "<div class='stickerFirstName'>" + selectedPlayer.fullname + "</div>" +
+                                            "</div></div>");
+                    playerNameToRemove = selectedPlayer.fullname;
+                }
+                else
+                {
+                    playerNameToRemove = $('#playerSelect-selectized').val();
+                    $("#" + currentSpot).html("<div class='stickerPick position-unknown'>" +
+                        "<div class='stickerPosition'>?</div>" +
+                        "<div class='stickerTeamAndWeek'>?</div>" +
+                        "<div class='stickerNamePlate'>" +
+                            "<div class='stickerFirstName'>" + playerNameToRemove + "</div>" +
+                        "</div></div>");
+                }
+                currentSpot++;
+                markPlayer(playerNameToRemove);
+                selectizePlayer[0].selectize.removeOption(playerNameToRemove);
+                //selectizePlayer[0].selectize.clear();
+            });
+            $('#undoButton').click(function () {
+                if (currentSpot != 1) {
+                    currentSpot--;
+                    $("#" + currentSpot).html('<div class="stickerPick row"> </div>');
+                }
+            });
+
+            $('#blackOutButton').click(function () {
+                if(($('#playerSelect-selectized').val()))
+                    markPlayer($('#playerSelect-selectized').val());
+                else
+                    markPlayer(selectedPlayer.fullname);
+            });
+
+            $('#createCheatSheet').click(function () {
+                var tabID = $(".nav-tabs").children().length;
+                $('#add-cheatsheet').closest('li').before($('<li><a href="#tab' + tabID + '" role="tab" data-toggle="tab"><span>' + $("#cheatsheet_title").val() + ' </span> <button class="close" type="button" title="Remove this page">×</button></a></li>'));
+                $('.tab-content').append($('<div class="tab-pane fade" id="tab' + tabID + '">Tab ' + tabID + ' content</div>'));
+                generateTable("#tab" + tabID);
+                $("#cheatsheet_title").val("");
+                $("#cheatsheet_data").val("");
+            });
+        });
+
+        function generateTable(dom) {
+            var data = $('#cheatsheet_data').val();
+            var rows = data.split("\n");
+            // remove empty lines
+            rows = rows.filter(function (e) { return e.replace(/(\r\n|\n|\r)/gm, "") });
+            var table = '';
+
+            for (var y = 0; y < rows.length; y++) {
+                var cells = rows[y].split("\t");
+                // remove empty cells
+                cells = cells.filter(function (e) { return e.replace(/(\r\n|\n|\r)/gm, "") });
+                //if first row or if a row jas one cell
+                if (cells.length == 1 || y == 0) {
+                    //if there is more then one cell display all of them, this is for tables with no title
+                    if (cells.length > 1) {
+                        var row = '';
+                        for (var x in cells) {
+                            row += '<td>' + cells[x] + '</td>';
+                        }
+                        table += '<table class="table-striped cheatSheetTable table-bordered"><tr class="cheatSheetTitle" >' + row + '</tr>';
+                    }
+                    // if cell contains "tier" its part of the same table, dont create a new table just highlight the tier
+                    else if (!rows[y].toLowerCase().includes("tier")) {
+                        if (y > 1) {
+                            table += '</table>';
+                        }
+                        table += '<table class="table-striped cheatSheetTable table-bordered">';
+                        table += '<tr class="cheatSheetTitle" ><td colspan="' + 50 + '">' + cells[0] + '</td></tr>';
+                    }
+                     // if one cell, print the cell and have it span all cells (using 50 for "all")
+                    else {
+                        table += '<tr class="cheatSheetTier" ><td colspan="' + 50 + '">' + cells[0] + '</td></tr>';
+                    }
+                }
+                else {
+                    var row = '<tr>';
+                    for (var x in cells) {
+                        row += '<td>' + cells[x] + '</td>';
+                    }
+                    table += row + '</tr>';
+                }
+            }
+            // Insert into DOM
+            $(dom).html(table);
+        }
+
+        function markPlayer(playerName) {
+            if (playerName) {
+                var aTags = $('.cheatSheetTable tr');
+                for (var i = 0; i < aTags.length; i++) {
+                    if (aTags[i].innerHTML.indexOf(playerName) > -1) {
+                        var c = aTags[i].children;
+                        for (var j = 0; j < c.length; j++) {
+                            c[j].style.backgroundColor = '#000000';
+                        }
+                        aTags[i].style.backgroundColor = '#000000';
+                    }
+                }
+            }
+        }
+    </script>
+}

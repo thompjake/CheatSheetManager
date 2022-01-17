@@ -1,0 +1,179 @@
+﻿body {
+    overflow:hidden;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top:215px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+.draftTable {
+    table-layout: fixed;
+    width: 100%;
+}
+
+th.roundNumber
+{ 
+     width: 25px;
+}
+
+
+.stickerPick {
+    background-color: #aee5ae;
+    min-height: 100px;
+    min-width: 100px;
+    border-radius: 4px;
+    background: #dbdbdb;
+    margin: 0 2px 2px 0;
+    padding: 8px;  
+    justify-content: center;
+    color:white;
+}
+
+.position-RB {
+        background: #03c554
+    }
+
+.position-WR
+{
+        background: #f3b700;
+}
+
+.position-QB
+{
+        background: #ef3d30;
+}
+
+.position-TE
+{
+        background: #178be8;
+}
+
+.position-DST
+{
+        background: #6031b5;
+}
+
+.position-K
+{
+        background: #1e9c98;
+}
+
+.position-unknown{
+            background: #6c706e;
+}
+
+
+.stickerPosition {
+float: left;
+    margin-top: -2px;
+}
+
+.stickerTeamAndWeek {
+    float: right;
+    clear: right;
+    margin-top: -3px;
+}
+
+.stickerNamePlate {
+    margin-top:20px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    line-height:20px;
+    height:100%;
+    width:100%;
+}
+
+.stickerFirstName {
+    font-size: .90vw;
+    font-weight:700;
+    overflow:hidden;
+}
+
+.stickerLastName {
+    font-size: 32px;
+}
+
+.table > tbody > tr > td {
+    padding: 0px;
+}
+
+
+
+/*Player Input*/
+.playerSelectBox
+{
+background:#000000;
+padding:10px;
+color:white;
+}
+
+.playerSelectBox h1{
+    font-family:Impact;
+    background:#ffbf00;
+    width:200px;
+    transform: rotate(-2deg);
+    color:#000000;
+}
+
+.top-control{
+position:fixed;
+top:0px;
+}
+
+.draft-tabs
+{
+    background:#ffffff;
+}
+
+
+.selectize-control {
+    vertical-align: middle;
+    margin-top:5px;
+    border:none;
+}
+
+
+.tab-pane
+{
+    overflow:scroll;
+    height:100vh;
+}
+
+.cheatSheetTable
+{
+margin:15px;
+display:inline;
+}
+
+.table-striped tbody tr.cheatSheetTitle td{
+background:#27ae60;
+color:white;
+text-align:center;
+font-weight:700;
+}
+
+
+.table-striped tbody tr.cheatSheetTier td{
+background:#2acc6e;
+color:white;
+text-align:left;
+font-weight:300;
+}
